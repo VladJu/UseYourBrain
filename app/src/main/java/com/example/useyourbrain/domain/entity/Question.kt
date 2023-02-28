@@ -5,4 +5,7 @@ data class Question(
     val visibleNumberInLeftSquare : Int,
     val optionsAnswer : List<Int>
 ) {
+
+    val rightAnswer : Int
+    get() = sumShowInCircle - visibleNumberInLeftSquare
 }

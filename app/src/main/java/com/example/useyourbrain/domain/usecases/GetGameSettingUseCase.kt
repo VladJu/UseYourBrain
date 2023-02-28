@@ -12,7 +12,6 @@ class GetGameSettingUseCase(
 
     operator fun invoke(level: Level): GameSettings {
         return repository.getGameSettings(level)
-
     }
 
 }
