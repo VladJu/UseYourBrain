@@ -4,7 +4,7 @@ import com.example.useyourbrain.domain.entity.Question
 import com.example.useyourbrain.domain.repository.GameRepository
 
 //generate question
-class GetGameQuestionUseCase(
+class GenerateQuestionUseCase(
     private val repository: GameRepository
 ) {
 
