@@ -7,11 +7,10 @@ import java.io.Serializable
 
 @Parcelize
 data class GameResult (
-    //смайлик
+    //smile
     val winner : Boolean,
     val countOfRightAnswers : Int,
-    val totalCountQuestions : Int,
-    //из настроей получаем какое минимальное кол-во ответов должно быть
+    val countOfQuestions : Int,
     val gameSettings : GameSettings
 
 ) : Parcelable

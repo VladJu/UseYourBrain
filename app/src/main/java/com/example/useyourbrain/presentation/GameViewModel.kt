@@ -17,6 +17,7 @@ import com.example.useyourbrain.domain.usecases.GetGameSettingUseCase
 class GameViewModel(application: Application) : AndroidViewModel(application) {
     //1
     private lateinit var gameSettings: GameSettings
+
     //2
     private lateinit var level: Level
 
@@ -86,11 +87,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         startTimer()
         //4
         generateQuestion()
+        updateProgress()
 
     }
 
 
-    private fun chooseAnswer(number: Int) {
+    fun chooseAnswer(number: Int) {
         //5
         checkAnswer(number)
         //6
@@ -118,6 +120,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     //8
     private fun calculatePercentOfRightAnswers(): Int {
+        if (countOfQuestion ==0){
+            return 0
+        }
         return ((countOfRightAnswer / countOfQuestion.toDouble()) * 100).toInt()
     }
 
@@ -173,7 +178,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _gameResult.value = GameResult(
             winner = enoughCountOfRightAnswers.value == true && enoughPercent.value == true,
             countOfRightAnswers = countOfRightAnswer,
-            totalCountQuestions = countOfQuestion,
+            countOfQuestions = countOfQuestion,
             gameSettings = gameSettings
         )
     }
