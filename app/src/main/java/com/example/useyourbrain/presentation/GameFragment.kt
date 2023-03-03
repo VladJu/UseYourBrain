@@ -1,20 +1,42 @@
 package com.example.useyourbrain.presentation
 
+import android.content.res.ColorStateList
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.useyourbrain.R
 import com.example.useyourbrain.databinding.FragmentGameBinding
-import com.example.useyourbrain.databinding.FragmentWelcomeBinding
 import com.example.useyourbrain.domain.entity.GameResult
-import com.example.useyourbrain.domain.entity.GameSettings
 import com.example.useyourbrain.domain.entity.Level
 
 class GameFragment : Fragment() {
 
     private lateinit var level: Level
+
+
+    private val viewModel: GameViewModel by lazy {
+        ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().application)
+        )[GameViewModel::class.java]
+
+    }
+
+    private val tvOptions by lazy {
+        mutableListOf<TextView>().apply {
+            add(binding.tvOption1)
+            add(binding.tvOption2)
+            add(binding.tvOption3)
+            add(binding.tvOption4)
+            add(binding.tvOption5)
+            add(binding.tvOption6)
+        }
+    }
 
     private var _binding: FragmentGameBinding? = null
     private val binding: FragmentGameBinding
@@ -35,36 +57,90 @@ class GameFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.tvOption1.setOnClickListener {
-            launchGameFinishFragment(
-                GameResult(
-                    true,
-                    0,
-                    0,
-                    GameSettings(
-                        0,
-                        0,
-                        0,
-                        0
-                    )
-                )
-            )
-        }
+        observeViewModel()
+        //11
+        setClickListenersToOptionsAnswers()
+        //10
+        viewModel.startGame(level)
     }
+
+    //11
+     private fun setClickListenersToOptionsAnswers(){
+         for (tvOption in tvOptions){
+             tvOption.setOnClickListener {
+                 viewModel.chooseAnswer(tvOption.text.toString().toInt())
+             }
+         }
+     }
+
+
+    //2
+    private fun observeViewModel() {
+        //3
+        viewModel.question.observe(viewLifecycleOwner) {
+            binding.tvSum.text = it.sumShowInCircle.toString()
+            binding.tvLeftNumber.text = it.visibleNumberInLeftSquare.toString()
+            //set all options answers
+            for (i in 0 until tvOptions.size) {
+                tvOptions[i].text = it.optionsAnswer[i].toString()
+            }
+        }
+        //4
+        viewModel.percentOfRightAnswer.observe(viewLifecycleOwner) {
+            binding.progressBar.setProgress(it, true)
+        }
+        //5
+        viewModel.enoughCountOfRightAnswers.observe(viewLifecycleOwner) {
+            binding.tvAnswersProgress.setTextColor(getColorByState(it))
+        }
+        //6
+        viewModel.enoughPercent.observe(viewLifecycleOwner) {
+            val color = getColorByState(it)
+            binding.progressBar.progressTintList= ColorStateList.valueOf(color)
+        }
+        //7
+        viewModel.formattedTime.observe(viewLifecycleOwner){
+            binding.tvTimer.text=it
+        }
+        //8
+        viewModel.minPercent.observe(viewLifecycleOwner){
+            binding.progressBar.secondaryProgress=it
+        }
+        //9
+        viewModel.gameResult.observe(viewLifecycleOwner){
+            launchGameFinishFragment(it)
+        }
+        viewModel.progressAnswers.observe(viewLifecycleOwner){
+            binding.tvAnswersProgress.text = it
+        }
+
+    }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-    // получим данный объет level из аргументов
+    //5 and 6
+    private fun getColorByState(goodState: Boolean): Int {
+        //check state
+        val colorResId = if (goodState) {
+            android.R.color.holo_green_light
+
+        } else {
+            android.R.color.holo_red_dark
+        }
+        return ContextCompat.getColor(requireContext(), colorResId)
+    }
+
+
     private fun parsArgs() {
         requireArguments().getParcelable<Level>(KEY_LEVEL)?.let {
-            level=it
+            level = it
         }
     }
 
-    // метод который запускает экран окончания игры
     private fun launchGameFinishFragment(gameResult: GameResult) {
         requireActivity().supportFragmentManager.beginTransaction()
             .replace(R.id.main_container, GameFinishedFragment.newInstance(gameResult))
@@ -78,9 +154,6 @@ class GameFragment : Fragment() {
         const val NAME = "GameFragment"
 
         private const val KEY_LEVEL = "level"
-        //Чтобы положить объект Level , то данный класс должен реализовывать интерфейс Serializable
-        //И если класс реализует интерфейс Serializable, то объект этого класса можно превратить в набор байтов
-        //и обратно из набора байтов можно получить объект, но Enum Классы не явно его реализуют
 
         fun newInstance(level: Level): GameFragment {
             return GameFragment().apply {
