@@ -33,7 +33,7 @@ class GameFinishedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupClickListeners()
-        bindViews()
+        binding.gameResult = args.gameResult
     }
 
     private fun setupClickListeners() {
@@ -42,60 +42,13 @@ class GameFinishedFragment : Fragment() {
         }
     }
 
-    private fun bindViews() {
-        with(binding) {
-            emojiResult.setImageResource(getSmileResId())
-            tvRequiredCountAnswers.text = String.format(
-                getString(R.string.required_score),
-                args.gameResult.gameSettings.minCountOfRightAnswersForWinner.toString()
-            )
-            tvYourScoreRightAnswers.text = String.format(
-                getString(R.string.score_answers),
-                args.gameResult.countOfRightAnswers.toString()
-            )
-            tvRequiredPercentage.text = String.format(
-                getString(R.string.required_percentage),
-                args.gameResult.gameSettings.minPercentOfRightAnswersForWinner.toString()
-            )
-            tvYourScorePercentage.text = String.format(
-                getString(R.string.score_percentage),
-                getPercentOfRightAnswers()
-            )
-            tvYourCountRightAnswer.text = String.format(
-                getString(R.string.count_right_answer),
-                args.gameResult.countOfRightAnswers, args.gameResult.countOfQuestions
-            )
-        }
-
-    }
-
-    private fun getSmileResId(): Int {
-        return if (args.gameResult.winner) {
-            R.drawable.ic_smile
-        } else {
-            R.drawable.ic_sad
-        }
-    }
-
-    private fun getPercentOfRightAnswers() = with(args.gameResult) {
-        if (countOfRightAnswers == 0) {
-            0
-        } else {
-            ((countOfRightAnswers / countOfQuestions.toDouble()) * 100).toInt()
-        }
-    }
-
-
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
-
-
     private fun retryGame() {
         findNavController().popBackStack()
     }
-
 
 }
